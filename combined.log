@@ -1,0 +1,48 @@
+{"level":"info","message":"Server running on port 3000","timestamp":"2024-08-13T06:45:16.260Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2024-08-13T06:45:16.312Z"}
+{"level":"info","message":"Server running on port 3000","timestamp":"2024-08-13T06:45:24.124Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2024-08-13T06:45:24.186Z"}
+{"level":"info","message":"Server running on port 3000","timestamp":"2024-08-13T06:45:44.055Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2024-08-13T06:45:44.111Z"}
+{"level":"info","message":"Server running on port 3000","timestamp":"2024-08-13T06:48:43.850Z"}
+{"level":"info","message":"Mongoose connection is open","timestamp":"2024-08-13T06:48:43.912Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2024-08-13T06:48:43.913Z"}
+{"code":"ENOTFOUND","errno":-3008,"hostname":"redis","level":"error","message":"Redis error: Redis connection to redis:6379 failed - getaddrinfo ENOTFOUND redis","stack":"Error: getaddrinfo ENOTFOUND redis\n    at GetAddrInfoReqWrap.onlookup [as oncomplete] (node:dns:108:26)","syscall":"getaddrinfo","timestamp":"2024-08-13T06:48:49.182Z"}
+{"code":"ENOTFOUND","errno":-3008,"hostname":"redis","level":"error","message":"Redis error: Redis connection to redis:6379 failed - getaddrinfo ENOTFOUND redis","stack":"Error: getaddrinfo ENOTFOUND redis\n    at GetAddrInfoReqWrap.onlookup [as oncomplete] (node:dns:108:26)","syscall":"getaddrinfo","timestamp":"2024-08-13T06:48:52.146Z"}
+{"code":"ENOTFOUND","errno":-3008,"hostname":"redis","level":"error","message":"Redis error: Redis connection to redis:6379 failed - getaddrinfo ENOTFOUND redis","stack":"Error: getaddrinfo ENOTFOUND redis\n    at GetAddrInfoReqWrap.onlookup [as oncomplete] (node:dns:108:26)","syscall":"getaddrinfo","timestamp":"2024-08-13T06:48:57.246Z"}
+{"code":"ENOTFOUND","errno":-3008,"hostname":"redis","level":"error","message":"Redis error: Redis connection to redis:6379 failed - getaddrinfo ENOTFOUND redis","stack":"Error: getaddrinfo ENOTFOUND redis\n    at GetAddrInfoReqWrap.onlookup [as oncomplete] (node:dns:108:26)","syscall":"getaddrinfo","timestamp":"2024-08-13T06:49:00.504Z"}
+{"code":"ENOTFOUND","errno":-3008,"hostname":"redis","level":"error","message":"Redis error: Redis connection to redis:6379 failed - getaddrinfo ENOTFOUND redis","stack":"Error: getaddrinfo ENOTFOUND redis\n    at GetAddrInfoReqWrap.onlookup [as oncomplete] (node:dns:108:26)","syscall":"getaddrinfo","timestamp":"2024-08-13T06:49:05.325Z"}
+{"code":"ENOTFOUND","errno":-3008,"hostname":"redis","level":"error","message":"Redis error: Redis connection to redis:6379 failed - getaddrinfo ENOTFOUND redis","stack":"Error: getaddrinfo ENOTFOUND redis\n    at GetAddrInfoReqWrap.onlookup [as oncomplete] (node:dns:108:26)","syscall":"getaddrinfo","timestamp":"2024-08-13T06:49:09.682Z"}
+{"code":"ENOTFOUND","errno":-3008,"hostname":"redis","level":"error","message":"Redis error: Redis connection to redis:6379 failed - getaddrinfo ENOTFOUND redis","stack":"Error: getaddrinfo ENOTFOUND redis\n    at GetAddrInfoReqWrap.onlookup [as oncomplete] (node:dns:108:26)","syscall":"getaddrinfo","timestamp":"2024-08-13T06:49:15.230Z"}
+{"code":"ENOTFOUND","errno":-3008,"hostname":"redis","level":"error","message":"Redis error: Redis connection to redis:6379 failed - getaddrinfo ENOTFOUND redis","stack":"Error: getaddrinfo ENOTFOUND redis\n    at GetAddrInfoReqWrap.onlookup [as oncomplete] (node:dns:108:26)","syscall":"getaddrinfo","timestamp":"2024-08-13T06:49:22.774Z"}
+{"code":"ENOTFOUND","errno":-3008,"hostname":"redis","level":"error","message":"Redis error: Redis connection to redis:6379 failed - getaddrinfo ENOTFOUND redis","stack":"Error: getaddrinfo ENOTFOUND redis\n    at GetAddrInfoReqWrap.onlookup [as oncomplete] (node:dns:108:26)","syscall":"getaddrinfo","timestamp":"2024-08-13T06:49:33.691Z"}
+{"code":"ENOTFOUND","errno":-3008,"hostname":"redis","level":"error","message":"Redis error: Redis connection to redis:6379 failed - getaddrinfo ENOTFOUND redis","stack":"Error: getaddrinfo ENOTFOUND redis\n    at GetAddrInfoReqWrap.onlookup [as oncomplete] (node:dns:108:26)","syscall":"getaddrinfo","timestamp":"2024-08-13T06:49:50.340Z"}
+{"code":"ENOTFOUND","errno":-3008,"hostname":"redis","level":"error","message":"Redis error: Redis connection to redis:6379 failed - getaddrinfo ENOTFOUND redis","stack":"Error: getaddrinfo ENOTFOUND redis\n    at GetAddrInfoReqWrap.onlookup [as oncomplete] (node:dns:108:26)","syscall":"getaddrinfo","timestamp":"2024-08-13T06:50:16.760Z"}
+{"code":"ENOTFOUND","errno":-3008,"hostname":"redis","level":"error","message":"Redis error: Redis connection to redis:6379 failed - getaddrinfo ENOTFOUND redis","stack":"Error: getaddrinfo ENOTFOUND redis\n    at GetAddrInfoReqWrap.onlookup [as oncomplete] (node:dns:108:26)","syscall":"getaddrinfo","timestamp":"2024-08-13T06:50:59.798Z"}
+{"code":"ENOTFOUND","errno":-3008,"hostname":"redis","level":"error","message":"Redis error: Redis connection to redis:6379 failed - getaddrinfo ENOTFOUND redis","stack":"Error: getaddrinfo ENOTFOUND redis\n    at GetAddrInfoReqWrap.onlookup [as oncomplete] (node:dns:108:26)","syscall":"getaddrinfo","timestamp":"2024-08-13T06:52:11.079Z"}
+{"code":"ENOTFOUND","errno":-3008,"hostname":"redis","level":"error","message":"Redis error: Redis connection to redis:6379 failed - getaddrinfo ENOTFOUND redis","stack":"Error: getaddrinfo ENOTFOUND redis\n    at GetAddrInfoReqWrap.onlookup [as oncomplete] (node:dns:108:26)","syscall":"getaddrinfo","timestamp":"2024-08-13T06:54:10.364Z"}
+{"code":"ENOTFOUND","errno":-3008,"hostname":"redis","level":"error","message":"Redis error: Redis connection to redis:6379 failed - getaddrinfo ENOTFOUND redis","stack":"Error: getaddrinfo ENOTFOUND redis\n    at GetAddrInfoReqWrap.onlookup [as oncomplete] (node:dns:108:26)","syscall":"getaddrinfo","timestamp":"2024-08-13T06:57:31.266Z"}
+{"code":"ENOTFOUND","errno":-3008,"hostname":"redis","level":"error","message":"Redis error: Redis connection to redis:6379 failed - getaddrinfo ENOTFOUND redis","stack":"Error: getaddrinfo ENOTFOUND redis\n    at GetAddrInfoReqWrap.onlookup [as oncomplete] (node:dns:108:26)","syscall":"getaddrinfo","timestamp":"2024-08-13T07:03:10.912Z"}
+{"level":"info","message":"Server running on port 3000","timestamp":"2024-08-13T07:08:13.754Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2024-08-13T07:08:13.908Z"}
+{"level":"info","message":"Server running on port 3000","timestamp":"2024-08-13T07:10:29.854Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2024-08-13T07:10:29.998Z"}
+{"level":"info","message":"Server running on port 3000","timestamp":"2024-08-13T07:16:01.509Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2024-08-13T07:16:01.630Z"}
+{"level":"info","message":"Server running on port 3000","timestamp":"2024-08-13T07:28:06.642Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2024-08-13T07:28:06.766Z"}
+{"level":"info","message":"Server running on port 3000","timestamp":"2024-08-13T07:57:21.963Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2024-08-13T07:57:22.040Z"}
+{"level":"info","message":"Server running on port 3000","timestamp":"2024-08-13T11:16:01.331Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2024-08-13T11:16:01.354Z"}
+{"level":"info","message":"Server running on port 3000","timestamp":"2024-08-13T11:28:00.504Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2024-08-13T11:28:00.519Z"}
+{"level":"info","message":"Server running on port 3000","timestamp":"2024-08-13T11:37:17.920Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2024-08-13T11:37:17.940Z"}
+{"$__":{"$versionError":null,"activePaths":{"paths":{"telegramId":"require","username":"require"},"states":{"default":{},"modify":{},"require":{"telegramId":true,"username":true}}},"backup":{"activePaths":{"default":{"_id":true,"compute":true,"computePower":true,"createdAt":true,"referralChain":true,"referrals":true,"totalTaps":true,"xp":true},"modify":{"telegramId":true,"updatedAt":true,"username":true}},"validationError":null},"cachedRequired":{},"inserting":true,"op":null,"saveOptions":null,"savedState":{},"saving":null,"validating":null},"$isNew":false,"_doc":{"__v":0,"_id":"66bb4577729246261fde192c","compute":0,"computePower":1,"createdAt":"2024-08-13T11:37:27.622Z","referralChain":[],"referrals":[],"telegramId":"11111","totalTaps":0,"updatedAt":"2024-08-13T11:37:27.627Z","username":"doe","xp":0},"level":"info","message":"New user created:","timestamp":"2024-08-13T11:37:27.733Z"}
+{"level":"info","message":"Server running on port 3000","timestamp":"2024-08-13T11:47:35.791Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2024-08-13T11:47:35.810Z"}
+{"level":"info","message":"Server running on port 3000","timestamp":"2024-08-13T11:53:25.785Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2024-08-13T11:53:25.819Z"}
+{"body":"\r\n","expose":true,"level":"error","message":"ERROR 💥 Unexpected end of JSON input","status":400,"statusCode":400,"timestamp":"2024-08-13T12:13:14.271Z","type":"entity.parse.failed"}
+{"body":"\r\n","expose":true,"level":"error","message":"ERROR 💥 Unexpected end of JSON input","status":400,"statusCode":400,"timestamp":"2024-08-13T12:14:18.398Z","type":"entity.parse.failed"}
