@@ -1,4 +1,4 @@
-# Neurolov APU Microapp
+# Neurolov GPU Microapp
 Backend for Telegram based Micro Application
 
 ## Overview
