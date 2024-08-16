@@ -109,7 +109,8 @@ Authorization: Bearer <your_jwt_token>
 **Condition**: If there's a server error
 **Code**: `500 INTERNAL SERVER ERROR`
 **Content**: `{ "message": "Internal server error" }`
-  ```
+
+
 
 ### 5. Upgrade GPU
 
@@ -117,6 +118,7 @@ Authorization: Bearer <your_jwt_token>
 - **Method**: `POST`
 - **Headers**: Authorization
 - **Response**: 
+
   ```json
   {
     "message": "GPU upgraded",
