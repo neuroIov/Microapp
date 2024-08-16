@@ -46,7 +46,7 @@ router.post('/claim-daily-xp', async (req, res) => {
 // Tap GPU
 router.post('/tap', async (req, res) => {
   try {
-    const { id } = req.user; // Changed from telegramId to id to match the JWT payload
+    const { id } = req.user;
     const user = await User.findOne({ telegramId: id });
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
@@ -54,19 +54,45 @@ router.post('/tap', async (req, res) => {
 
     const now = new Date();
     if (user.cooldownEndTime && now < user.cooldownEndTime) {
-      return res.status(400).json({ message: 'GPU is cooling down', cooldownEndTime: user.cooldownEndTime });
+      return res.status(400).json({ 
+        message: 'GPU is cooling down', 
+        cooldownEndTime: user.cooldownEndTime,
+        breathingLight: {
+          color: 'red',
+          intensity: 1 // Full intensity during cooldown
+        }
+      });
     }
 
     user.totalTaps += 1;
     user.compute += user.computePower;
     user.lastTapTime = now;
 
+    // Calculate breathing light color and intensity
+    let breathingLightColor = 'blue';
+    let breathingLightIntensity = (user.totalTaps % 1000) / 1000;
+
     if (user.totalTaps % 1000 === 0) {
       user.cooldownEndTime = new Date(now.getTime() + 5 * 60 * 1000);
+      breathingLightColor = 'red';
+      breathingLightIntensity = 1;
     }
 
     await user.save();
-    res.json({ message: 'Tap successful', user });
+
+    res.json({ 
+      message: 'Tap successful', 
+      user: {
+        compute: user.compute,
+        totalTaps: user.totalTaps,
+        computePower: user.computePower,
+        cooldownEndTime: user.cooldownEndTime
+      },
+      breathingLight: {
+        color: breathingLightColor,
+        intensity: breathingLightIntensity
+      }
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
