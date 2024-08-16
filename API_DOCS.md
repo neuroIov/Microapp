@@ -58,7 +58,7 @@ Authorization: Bearer <your_jwt_token>
   }
   ```
 
-### 4. ## Tap GPU
+### 4. Tap GPU
 
 **URL**: `/users/tap`
 **Method**: `POST`
