@@ -243,7 +243,57 @@ Authorization: Bearer <your_jwt_token>
     ]
   }
   ```
+## Tap GPU
 
+**URL**: `/api/users/tap`
+**Method**: `POST`
+**Auth required**: Yes (JWT Token in Authorization header)
+
+### Success Response
+
+**Code**: `200 OK`
+**Content example**:
+
+```json
+{
+  "message": "Tap successful",
+  "user": {
+    "compute": 1050,
+    "totalTaps": 1050,
+    "computePower": 1,
+    "cooldownEndTime": "2023-08-13T12:34:56.789Z" // only present if cooldown is active
+  },
+  "breathingLight": {
+    "color": "blue",
+    "intensity": 0.05 // ranges from 0 to 1
+  }
+}
+```
+
+### Error Responses
+
+**Condition**: If GPU is in cooldown
+**Code**: `400 BAD REQUEST`
+**Content**:
+
+```json
+{
+  "message": "GPU is cooling down",
+  "cooldownEndTime": "2023-08-13T12:34:56.789Z",
+  "breathingLight": {
+    "color": "red",
+    "intensity": 1
+  }
+}
+```
+
+**Condition**: If user is not found
+**Code**: `404 NOT FOUND`
+**Content**: `{ "message": "User not found" }`
+
+**Condition**: If there's a server error
+**Code**: `500 INTERNAL SERVER ERROR`
+**Content**: `{ "message": "Internal server error" }`
 ## Error Handling
 
 All endpoints may return appropriate HTTP status codes:
