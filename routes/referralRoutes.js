@@ -2,9 +2,11 @@ const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
 const { generateReferralCode, validateReferralCode } = require('../utils/referralUtils');
+const auth = require('../middleware/auth');
+const crypto = require('crypto');
 
 // Generate referral code for the user
-router.get('/generate-code', async (req, res) => {
+router.post('/generate-code', auth, async (req, res) => {
   try {
     const user = await User.findOne({ telegramId: req.user.telegramId });
     if (!user) {
@@ -12,7 +14,7 @@ router.get('/generate-code', async (req, res) => {
     }
 
     if (!user.referralCode) {
-      user.referralCode = generateReferralCode();
+      user.referralCode = crypto.randomBytes(4).toString('hex');
       await user.save();
     }
 
