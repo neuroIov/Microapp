@@ -18,9 +18,12 @@ const User = require('./models/User');  // Import the User model
 
 const userRoutes = require('./routes/userRoutes');
 const questRoutes = require('./routes/questRoutes');
+
 const leaderboardRoutes = require('./routes/leaderboardRoutes');
 const profileDashboardRoutes = require('./routes/profileDashboardRoutes');
 const referralRoutes = require('./routes/referralRoutes');
+const settingsRoutes = require('./routes/settingsRoutes');
+const achievementRoutes = require('./routes/achivementRoutes');
 
 const app = express();
 
@@ -101,9 +104,11 @@ app.get('/metrics', async (req, res) => {
 // Routes
 app.use('/api/users', authenticateJWT, userRoutes);
 app.use('/api/quests', authenticateJWT, questRoutes);
+app.use('/api/achievements', achievementRoutes);
 app.use('/api/leaderboard', authenticateJWT, leaderboardRoutes);
 app.use('/api/profile-dashboard', authenticateJWT, profileDashboardRoutes);
 app.use('/api/referral', authenticateJWT, referralRoutes);
+app.use('/api/settings', settingsRoutes);
 
 // Telegram auth route
 app.post('/auth/telegram', async (req, res) => {

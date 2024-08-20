@@ -16,3 +16,5 @@
 {"code":"ENOTFOUND","errno":-3008,"hostname":"redis","level":"error","message":"Redis error: Redis connection to redis:6379 failed - getaddrinfo ENOTFOUND redis","stack":"Error: getaddrinfo ENOTFOUND redis\n    at GetAddrInfoReqWrap.onlookup [as oncomplete] (node:dns:108:26)","syscall":"getaddrinfo","timestamp":"2024-08-13T07:03:10.912Z"}
 {"body":"\r\n","expose":true,"level":"error","message":"ERROR 💥 Unexpected end of JSON input","status":400,"statusCode":400,"timestamp":"2024-08-13T12:13:14.271Z","type":"entity.parse.failed"}
 {"body":"\r\n","expose":true,"level":"error","message":"ERROR 💥 Unexpected end of JSON input","status":400,"statusCode":400,"timestamp":"2024-08-13T12:14:18.398Z","type":"entity.parse.failed"}
+{"body":"\r\n","expose":true,"level":"error","message":"ERROR 💥 Unexpected end of JSON input","service":"user-service","status":400,"statusCode":400,"type":"entity.parse.failed"}
+{"body":"\r\n","expose":true,"level":"error","message":"ERROR 💥 Unexpected end of JSON input","service":"user-service","status":400,"statusCode":400,"type":"entity.parse.failed"}
