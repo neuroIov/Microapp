@@ -2,7 +2,7 @@
 
 # GPU Tapping Game API Documentation
 
-Base URL: `http://your-api-base-url.com/api`
+Base URL: `http://prod.eba-cimgkmsm.eu-north-1.elasticbeanstalk.com/api`
 
 ## Authentication
 
