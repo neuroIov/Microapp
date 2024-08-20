@@ -1,7 +1,15 @@
 const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
+const auth = require('../middleware/auth');
 
+const { validateUser } = require('../validation/userValidation');
+
+router.post('/create', async (req, res) => {
+  const { error } = validateUser(req.body);
+  if (error) return res.status(400).json({ message: error.details[0].message });
+ 
+});
 // Start or resume session
 router.post('/start', async (req, res) => {
   try {
@@ -107,22 +115,31 @@ router.post('/upgrade-gpu', async (req, res) => {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    const upgradeCost = user.computePower * 100;
-    if (user.compute < upgradeCost) {
-      return res.status(400).json({ message: 'Not enough compute for upgrade' });
+    const cpLevels = [10000, 20000, 30000, 40000, 50000, 60000, 70000];
+    const computeRewards = [2, 3, 4, 5, 6, 7, 10];
+
+    let newCpLevel = user.computePower;
+    for (let i = 0; i < cpLevels.length; i++) {
+      if (user.compute >= cpLevels[i]) {
+        newCpLevel = i + 1;
+      } else {
+        break;
+      }
     }
 
-    user.compute -= upgradeCost;
-    user.computePower += 1;
-    user.cooldownEndTime = new Date(Date.now() + 5 * 60 * 1000);
-
-    await user.save();
-    res.json({ message: 'GPU upgraded', user });
+    if (newCpLevel > user.computePower) {
+      user.computePower = newCpLevel;
+      user.computePerTap = computeRewards[newCpLevel - 1] || 1;
+      user.cooldownEndTime = new Date(Date.now() + 5 * 60 * 1000);
+      await user.save();
+      res.json({ message: 'GPU upgraded', user });
+    } else {
+      res.status(400).json({ message: 'Not enough compute for upgrade' });
+    }
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 });
-
 // Add referral
 router.post('/add-referral', async (req, res) => {
   try {
@@ -164,4 +181,40 @@ router.post('/add-referral', async (req, res) => {
   }
 });
 
+// Updatexp
+router.post('/update-xp', async (req, res) => {
+  try {
+    const { telegramId } = req.user;
+    const { xpGained } = req.body;
+    
+    const user = await User.findOne({ telegramId });
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    user.xp += xpGained;
+
+    // Update XP for referrers (up to 10 levels)
+    let currentUser = user;
+    let xpToDistribute = xpGained;
+    for (let i = 0; i < 10; i++) {
+      if (!currentUser.referredBy) break;
+      
+      const referrer = await User.findById(currentUser.referredBy);
+      if (!referrer) break;
+
+      const xpShare = Math.floor(xpToDistribute * 0.1);
+      referrer.xp += xpShare;
+      await referrer.save();
+
+      xpToDistribute = xpShare;
+      currentUser = referrer;
+    }
+
+    await user.save();
+    res.json({ message: 'XP updated successfully', user });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
 module.exports = router;
