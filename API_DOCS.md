@@ -1,3 +1,5 @@
+## API Documentation
+
 # GPU Tapping Game API Documentation
 
 Base URL: `http://your-api-base-url.com/api`
@@ -12,39 +14,43 @@ Authorization: Bearer <your_jwt_token>
 
 ### 1. Telegram Authentication
 
+- `POST /auth/telegram`
+  - Authenticate user via Telegram
+  - Parameters: `{ id: string, first_name: string, username: string }`
+  - Returns: `{ token: string, user: { id: string, username: string } }`
+
+**Example:**
+    
 - **URL**: `/auth/telegram`
 - **Method**: `POST`
 - **Body**:
   ```json
   {
-    "id": "telegram_user_id",
-    "first_name": "User's First Name",
-    "username": "telegram_username"
+    "id": "12345678",
+    "first_name": "neo",
+    "username": "neohex"
   }
   ```
 - **Response**: 
   ```json
   {
-    "token": "your_jwt_token",
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjExMTExMTExMTEiLCJ1c2VybmFtZSI6ImJpbmFyeWJvZGkiLCJpYXQiOjE3MjQwNDY0OTksImV4cCI6MTcyNDEzMjg5OX0.r-GlIrf5tCKKoup_fDcTO35N4iyu021TkYR_RT-hpiY",
     "user": {
-      "id": "telegram_user_id",
-      "username": "telegram_username"
+      "id": "12345678",
+      "username": "neohex"
     }
   }
   ```
 
-## User Routes
+### 2. Claim Daily XP
 
-### 2. Start or Resume Session
+- `POST /api/users/claim-daily-xp`
+  - Perform daily check-in
+  - Returns: `{ xp: number, lastDailyClaimDate: number }`
 
-- **URL**: `/users/start`
-- **Method**: `POST`
-- **Headers**: Authorization
-- **Response**: User object
+  **Example:**
 
-### 3. Claim Daily XP
-
-- **URL**: `/users/claim-daily-xp`
+- **URL**: `/api/users/claim-daily-xp`
 - **Method**: `POST`
 - **Headers**: Authorization
 - **Response**: 
@@ -58,27 +64,78 @@ Authorization: Bearer <your_jwt_token>
   }
   ```
 
-### 4. Tap GPU
+### 3. Tap GPU
 
-- **URL**: `/users/tap`
-- **Method**: `POST`
-- **Headers**: Authorization
-- **Response**: 
-  ```json
-  {
+  - `POST /api/users/tap`
+  - Register a GPU tap
+  - Returns: `{ compute: number, totalTaps: number, computePower: number }`
+
+**Example:**
+
+**URL**: `api/users/tap`
+**Method**: `POST`
+**Auth required**: Yes (JWT Token in Authorization header)
+
+### Success Response
+
+**Code**: `200 OK`
+**Content example**:
+
+```json
+{
     "message": "Tap successful",
     "user": {
-      // Updated user object
+        "compute": 28,
+        "totalTaps": 28,
+        "computePower": 1
+    },
+    "breathingLight": {
+        "color": "blue",
+        "intensity": 0.028
     }
-  }
-  ```
+}
+```
 
-### 5. Upgrade GPU
+### Error Responses
+
+**Condition**: If GPU is in cooldown
+**Code**: `400 BAD REQUEST`
+**Content**:
+
+```json
+{
+  "message": "GPU is cooling down",
+  "cooldownEndTime": "2023-08-13T12:34:56.789Z",
+  "breathingLight": {
+    "color": "red",
+    "intensity": 1
+  }
+}
+```
+
+**Condition**: If user is not found
+**Code**: `404 NOT FOUND`
+**Content**: `{ "message": "User not found" }`
+
+**Condition**: If there's a server error
+**Code**: `500 INTERNAL SERVER ERROR`
+**Content**: `{ "message": "Internal server error" }`
+
+
+
+### 4. Upgrade GPU
+
+  - `POST /api/users/upgrade-gpu`
+  - Upgrade user's GPU
+  - Returns: `{ message: string, user: object }`
+
+**Example:**
 
 - **URL**: `/users/upgrade-gpu`
 - **Method**: `POST`
 - **Headers**: Authorization
 - **Response**: 
+
   ```json
   {
     "message": "GPU upgraded",
@@ -86,9 +143,15 @@ Authorization: Bearer <your_jwt_token>
       // Updated user object
     }
   }
-  ```
 
-### 6. Add Referral
+  or
+
+  {
+    "message": "Not enough compute for upgrade"
+}
+  ``
+
+### 5. Add Referral
 
 - **URL**: `/users/add-referral`
 - **Method**: `POST`
@@ -99,7 +162,7 @@ Authorization: Bearer <your_jwt_token>
     "referredId": "telegram_id_of_referred_user"
   }
   ```
-- **Response**: 
+ **Response**: 
   ```json
   {
     "message": "Referral added successfully",
@@ -111,50 +174,120 @@ Authorization: Bearer <your_jwt_token>
     }
   }
   ```
+### 6. Generate Referral Code
 
-## Quest Routes
+- `POST /api/referral/generate-code`
+  - Generate referral code
+  - Returns: `{ referralCode: string }`
 
-### 7. Get All Active Quests
+**Example:**
+
+- **URL**: `/referral/generate-code`
+- **Method**: `GET`
+- **Headers**: Authorization
+- **Response**: 
+  ```json
+  {
+    "referralCode": "ABCD1234"
+  }
+  ```
+  
+### 7. Apply Referral Code 
+
+- `POST /api/referral/apply-code`
+  - Apply referral code
+  - Parameters: `{ referralCode: string }`
+  - Returns: `{ message: string, xpEarned: number }`
+
+**Example:**
+
+- **URL**: `/referral/apply-code`
+- **Method**: `POST`
+- **Headers**: Authorization
+- **Body**:
+  ```json
+  {
+    "referralCode": "ABCD1234"
+  }
+  ```
+- **Response**: 
+  ```json
+  {
+    "message": "Referral code applied successfully"
+  }
+  ```
+  
+
+### 8. Get All Active Quests
+
+  - `GET /api/quests`
+  - Retrieve  quests
+  - Returns: `[{ id: string, name: string, description: string, xpReward: number, completed: boolean }]`
+
+**Example:**
 
 - **URL**: `/quests`
 - **Method**: `GET`
 - **Headers**: Authorization
 - **Response**: Array of active quests
 
-## Leaderboard Routes
+### 9. Claim Quests
 
-### 8. Get Global Leaderboard
+  - `POST /api/quests/claim/:questId`
+  - Claim completed quest
+  - Returns: `{ message: string, xp: number }`
 
-- **URL**: `/leaderboard/global`
-- **Method**: `GET`
-- **Headers**: Authorization
-- **Response**: Array of top 100 users
+### 10. Achievements 
+  - `GET /api/achievements`
+  - Retrieve user achievements
+  - Returns: `[{ id: string, name: string, description: string, completed: boolean, progress: number }]`
+    
+### 11. Get Timeframe Leaderboard
 
-### 9. Get User's Position in Leaderboard
-
-- **URL**: `/leaderboard/position`
-- **Method**: `GET`
-- **Headers**: Authorization
-- **Response**: 
-  ```json
-  {
-    "position": 42,
-    "totalUsers": 1000
-  }
-  ```
-
-### 10. Get Timeframe Leaderboard
-
-- **URL**: `/leaderboard/:timeframe`
+- **URL**: `/api/leaderboard/:timeframe`
 - **Method**: `GET`
 - **Headers**: Authorization
 - **Parameters**: 
   - `timeframe`: "daily", "weekly", or "monthly"
 - **Response**: Array of top 100 users for the specified timeframe
 
-## Profile Dashboard Routes
+### 11.1 Get Daily Leaderboard
 
-### 11. Get User Profile and Dashboard Data
+- **URL**: `/api/leaderboard/daily`
+- **Method**: `GET`
+- **Headers**: Authorization
+- **Response**: Array of top daily users
+
+### 11.2 Get Weekly Leaderboard
+
+- **URL**: `/api/leaderboard/weekly`
+- **Method**: `GET`
+- **Headers**: Authorization
+- **Response**: Array of top weekly users
+
+### 11.3 Get All-time Leaderboard
+
+- **URL**: `/api/leaderboard/ all-time`
+- **Method**: `GET`
+- **Headers**: Authorization
+- **Response**: Array of top all-time users
+
+ **Example Response**: 
+     {
+        "_id": "66c232c9780ceaeac4e9e52f",
+        "username": "johndoe",
+        "compute": 28,
+        "computePower": 1
+    },
+   {
+        "_id": "66c236a4a55ec79bf83bf64c",
+        "username": "binarybodi",
+        "compute": 28,
+        "computePower": 1
+    },
+
+
+### 12. Get User Profile and Dashboard Data
 
 - **URL**: `/profile-dashboard`
 - **Method**: `GET`
@@ -174,7 +307,7 @@ Authorization: Bearer <your_jwt_token>
   }
   ```
 
-### 12. Update User Profile
+### 13. Update User Profile
 
 - **URL**: `/profile-dashboard/update`
 - **Method**: `PUT`
@@ -195,39 +328,7 @@ Authorization: Bearer <your_jwt_token>
   }
   ```
 
-## Referral Routes
-
-### 13. Generate Referral Code
-
-- **URL**: `/referral/generate-code`
-- **Method**: `GET`
-- **Headers**: Authorization
-- **Response**: 
-  ```json
-  {
-    "referralCode": "ABCD1234"
-  }
-  ```
-
-### 14. Apply Referral Code
-
-- **URL**: `/referral/apply-code`
-- **Method**: `POST`
-- **Headers**: Authorization
-- **Body**:
-  ```json
-  {
-    "referralCode": "ABCD1234"
-  }
-  ```
-- **Response**: 
-  ```json
-  {
-    "message": "Referral code applied successfully"
-  }
-  ```
-
-### 15. Get Referral Statistics
+### 14. Get Referral Statistics
 
 - **URL**: `/referral/stats`
 - **Method**: `GET`
@@ -243,9 +344,19 @@ Authorization: Bearer <your_jwt_token>
     ]
   }
   ```
+### 15. View Settings
+- `GET /api/settings`
+  - Get user settings
+  - Returns: `{ notifications: boolean, language: string, theme: string }`
 
-## Error Handling
+### 16. Change Settings
 
+- `PUT /api/settings`
+  - Update user settings
+  - Parameters: `{ notifications?: boolean, language?: string, theme?: string }`
+  - Returns: `{ message: string, settings: object }`
+
+  
 All endpoints may return appropriate HTTP status codes:
 - 200: Success
 - 400: Bad Request
@@ -272,3 +383,4 @@ Error responses will have the following format:
 7. Be aware of any rate limiting policies (e.g., 100 requests per 15 minutes per IP).
 
 Please contact the backend team if you encounter any issues or need further clarification on any endpoint.
+
