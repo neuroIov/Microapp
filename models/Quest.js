@@ -11,4 +11,5 @@ const questSchema = new mongoose.Schema({
 // Compound index for querying active quests
 questSchema.index({ type: 1, expiresAt: 1 });
 
-module.exports = mongoose.model('Quest', questSchema);
+// Check if the model already exists before creating it
+module.exports = mongoose.models.Quest || mongoose.model('Quest', questSchema);
