@@ -13,6 +13,7 @@ const userSchema = new mongoose.Schema({
   referredBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', index: true },
   referrals: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
   referralCode: { type: String, unique: true, sparse: true, index: true },
+  referralChain: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }], // Added referralChain
   achievements: [{
     id: String,
     completed: Boolean,
@@ -30,14 +31,10 @@ const userSchema = new mongoose.Schema({
   notifications: { type: Boolean, default: true },
   language: { type: String, default: 'en' },
   theme: { type: String, default: 'dark' }
-});
+}, { timestamps: true }); // Added timestamps option
 
 userSchema.index({ computePower: -1, compute: -1 });
 
-userSchema.pre('save', function(next) {
-  this.updatedAt = new Date();
-  next();
-});
 userSchema.virtual('calculatedLevel').get(function() {
   return Math.floor(Math.sqrt(this.xp / 100)) + 1;
 });
@@ -49,6 +46,5 @@ userSchema.methods.canClaimDailyXP = function() {
   const timeSinceLastClaim = now - this.lastDailyClaimDate;
   return timeSinceLastClaim >= 24 * 60 * 60 * 1000; // 24 hours in milliseconds
 };
-
 
 module.exports = mongoose.model('User', userSchema);
