@@ -23,7 +23,7 @@ const leaderboardRoutes = require('./routes/leaderboardRoutes');
 const profileDashboardRoutes = require('./routes/profileDashboardRoutes');
 const referralRoutes = require('./routes/referralRoutes');
 const settingsRoutes = require('./routes/settingsRoutes');
-const achievementRoutes = require('./routes/achivementRoutes');
+const achievementRoutes = require('./routes/achievementRoutes');
 
 const app = express();
 
