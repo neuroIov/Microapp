@@ -4,28 +4,33 @@ const User = require('../models/User');
 const { generateReferralCode, validateReferralCode } = require('../utils/referralUtils');
 const auth = require('../middleware/auth');
 const crypto = require('crypto');
+const logger = require('../utils/logger');
 
 // Generate referral code for the user
 router.post('/generate-code', auth, async (req, res) => {
   try {
     const user = await User.findOne({ telegramId: req.user.telegramId });
+    
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
 
     if (!user.referralCode) {
-      user.referralCode = crypto.randomBytes(4).toString('hex');
+      user.referralCode = generateReferralCode();
       await user.save();
     }
 
     res.json({ referralCode: user.referralCode });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error('Error generating referral code:', error);
+    res.status(500).json({ message: 'Something went wrong while generating the referral code' });
   }
 });
 
+
+
 // Apply referral code
-router.post('/apply-code', async (req, res) => {
+router.post('/apply-code', auth, async (req, res) => {
   try {
     const { referralCode } = req.body;
     
@@ -53,9 +58,11 @@ router.post('/apply-code', async (req, res) => {
     }
 
     referredUser.referredBy = referrer._id;
+    referrer.referrals = referrer.referrals || [];
     referrer.referrals.push(referredUser._id);
 
     // Update referral chain (limit to 10 levels)
+    referrer.referralChain = referrer.referralChain || [];
     const referralChain = [referrer._id, ...referrer.referralChain.slice(0, 9)];
     referredUser.referralChain = referralChain;
 
@@ -63,10 +70,12 @@ router.post('/apply-code', async (req, res) => {
     let xpToDistribute = 1000;
     for (let i = 0; i < referralChain.length; i++) {
       const chainUser = await User.findById(referralChain[i]);
-      const xpShare = Math.floor(xpToDistribute * 0.1);
-      chainUser.xp += xpShare;
-      await chainUser.save();
-      xpToDistribute -= xpShare;
+      if (chainUser) {
+        const xpShare = Math.floor(xpToDistribute * 0.1);
+        chainUser.xp = (chainUser.xp || 0) + xpShare;
+        await chainUser.save();
+        xpToDistribute -= xpShare;
+      }
     }
 
     await referredUser.save();
@@ -74,7 +83,8 @@ router.post('/apply-code', async (req, res) => {
 
     res.json({ message: 'Referral code applied successfully' });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error('Error applying referral code:', error);
+    res.status(500).json({ message: 'Something went wrong while applying the referral code' });
   }
 });
 
