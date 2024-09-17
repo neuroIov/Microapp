@@ -14,6 +14,7 @@ const auth = require('./middleware/auth');
 const { initTelegramBot } = require('./utils/telegramBot');
 const { authenticateTelegram } = require('./controllers/userController');
 const { validateTelegramAuth } = require('./validation/userValidation');
+const telegramAuthMiddleware = require('./middleware/telegramAuth');
 
 // Import route files
 const userRoutes = require('./routes/userRoutes');
@@ -64,7 +65,7 @@ const limiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
 });
-app.use('/api', limiter);
+app.use('/api', telegramAuthMiddleware);
 
 // Prometheus metrics
 prometheus.collectDefaultMetrics({ timeout: 5000 });
