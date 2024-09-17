@@ -75,3 +75,8 @@ module.exports = (err, req, res, next) => {
     sendErrorProd(error, res);
   }
 };
+
+exports.handleServerError = (res, error) => {
+  logger.error(`Server error: ${error.message}`);
+  res.status(500).json({ message: 'Internal server error' });
+};

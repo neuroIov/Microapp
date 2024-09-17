@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
 const auth = require('../middleware/auth');
-const Quest = require('../models/Quest');
+const { param, validationResult } = require('express-validator');
 
 const dailyQuests = [
   { id: 'tap100', name: 'Tap 100 times', xpReward: 50, requirement: 100 },
@@ -28,11 +28,19 @@ router.get('/', auth, async (req, res) => {
 
     res.json(user.dailyQuests);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
 
-router.post('/claim/:questId', auth, async (req, res) => {
+router.post('/claim/:questId', [
+  auth,
+  param('questId').isString().trim().notEmpty()
+], async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
   try {
     const { questId } = req.params;
     const user = await User.findOne({ telegramId: req.user.telegramId });
@@ -54,7 +62,7 @@ router.post('/claim/:questId', auth, async (req, res) => {
       res.status(400).json({ message: 'Quest requirements not met' });
     }
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
 

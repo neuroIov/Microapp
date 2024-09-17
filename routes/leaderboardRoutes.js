@@ -2,8 +2,12 @@ const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
 const auth = require('../middleware/auth');
+const { param } = require('express-validator');
 
-router.get('/:type', auth, async (req, res) => {
+router.get('/:type', [
+  auth,
+  param('type').isIn(['daily', 'weekly', 'all-time'])
+], async (req, res) => {
   try {
     const { type } = req.params;
     let query = {};
@@ -21,8 +25,6 @@ router.get('/:type', auth, async (req, res) => {
       case 'all-time':
         sort = { computePower: -1, compute: -1 };
         break;
-      default:
-        return res.status(400).json({ message: 'Invalid leaderboard type' });
     }
 
     const leaderboard = await User.find(query)
@@ -32,18 +34,20 @@ router.get('/:type', auth, async (req, res) => {
 
     res.json(leaderboard);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
 
-router.get('/position/:type', auth, async (req, res) => {
+router.get('/position/:type', [
+  auth,
+  param('type').isIn(['daily', 'weekly', 'all-time'])
+], async (req, res) => {
   try {
     const { type } = req.params;
     const user = await User.findOne({ telegramId: req.user.telegramId });
     if (!user) return res.status(404).json({ message: 'User not found' });
 
     let query = {};
-    let sort = {};
 
     switch (type) {
       case 'daily':
@@ -66,8 +70,6 @@ router.get('/position/:type', auth, async (req, res) => {
           ]
         };
         break;
-      default:
-        return res.status(400).json({ message: 'Invalid leaderboard type' });
     }
 
     const position = await User.countDocuments(query) + 1;
@@ -75,7 +77,7 @@ router.get('/position/:type', auth, async (req, res) => {
 
     res.json({ position, totalUsers });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
 

@@ -1,0 +1,37 @@
+const crypto = require('crypto');
+
+function verifyTelegramWebAppData(telegramInitData) {
+  const initData = new URLSearchParams(telegramInitData);
+  const hash = initData.get('hash');
+  initData.delete('hash');
+  initData.sort();
+
+  let dataCheckString = '';
+  for (const [key, value] of initData) {
+    dataCheckString += `${key}=${value}\n`;
+  }
+  dataCheckString = dataCheckString.slice(0, -1);
+
+  const secret = crypto.createHmac('sha256', 'WebAppData').update(process.env.BOT_TOKEN);
+  const calculatedHash = crypto.createHmac('sha256', secret.digest()).update(dataCheckString).digest('hex');
+
+  return calculatedHash === hash;
+}
+
+function telegramAuthMiddleware(req, res, next) {
+  const telegramData = req.headers['telegram-data'];
+  
+  if (!telegramData) {
+    return res.status(401).json({ error: 'Telegram data not provided' });
+  }
+
+  const isValid = verifyTelegramWebAppData(telegramData);
+
+  if (!isValid) {
+    return res.status(401).json({ error: 'Invalid Telegram data' });
+  }
+
+  next();
+}
+
+module.exports = telegramAuthMiddleware;
