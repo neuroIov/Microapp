@@ -1,69 +1,58 @@
 const User = require('../models/User');
 const { handleServerError } = require('../middleware/errorHandler');
-const logger = require('../utils/logger');
-const crypto = require('crypto');
+const jwt = require('jsonwebtoken');
 const config = require('../config');
-
-const verifyTelegramWebAppData = (initData) => {
-  const urlParams = new URLSearchParams(initData);
-  const hash = urlParams.get('hash');
-  urlParams.delete('hash');
-  urlParams.sort();
-
-  let dataCheckString = '';
-  for (const [key, value] of urlParams.entries()) {
-    dataCheckString += `${key}=${value}\n`;
-  }
-  dataCheckString = dataCheckString.slice(0, -1);
-
-  const secretKey = crypto.createHmac('sha256', 'WebAppData').update(config.telegramBotToken).digest();
-  const calculatedHash = crypto.createHmac('sha256', secretKey).update(dataCheckString).digest('hex');
-
-  return calculatedHash === hash;
-};
 
 exports.authenticateTelegram = async (req, res) => {
   try {
-    const telegramData = req.header('Telegram-Data');
-    const { id, name, avatarUrl } = req.body;
+    const { id, first_name, username, photo_url, auth_date, hash } = req.body;
+    
+    // Verify the authentication data
+    const secretKey = crypto.createHash('sha256')
+      .update(config.telegramBotToken)
+      .digest();
+    const dataCheckString = Object.keys(req.body)
+      .filter(key => key !== 'hash')
+      .sort()
+      .map(key => `${key}=${req.body[key]}`)
+      .join('\n');
+    const hmac = crypto.createHmac('sha256', secretKey)
+      .update(dataCheckString)
+      .digest('hex');
+    
+    if (hmac !== hash) {
+      return res.status(401).json({ error: 'Invalid authentication data' });
+    }
 
-    if (!verifyTelegramWebAppData(telegramData)) {
-      logger.warn(`Invalid Telegram data attempt: ${id}`);
-      return res.status(401).json({ message: 'Invalid Telegram data' });
+    // Check if auth_date is not older than 1 hour
+    const now = Math.floor(Date.now() / 1000);
+    if (now - auth_date > 3600) {
+      return res.status(401).json({ error: 'Authentication data expired' });
     }
 
     let user = await User.findOneAndUpdate(
       { telegramId: id },
       { 
         $set: { 
-          username: name,
-          avatarUrl: avatarUrl
+          username: username || first_name,
+          avatarUrl: photo_url
         },
         $setOnInsert: { telegramId: id }
       },
-      { new: true, upsert: true, runValidators: true }
+      { new: true, upsert: true }
     );
 
-    const token = user.generateAuthToken();
+    const token = jwt.sign({ id: user.telegramId }, config.jwtSecret, { expiresIn: '7d' });
 
-    res.json({
-      token,
-      user: {
-        id: user.telegramId,
-        username: user.username,
-        xp: user.xp
-      }
-    });
-    logger.info(`User authenticated: ${id}`);
+    res.json({ token, user: user.toJSON() });
   } catch (error) {
-    logger.error(`Authentication error: ${error.message}`);
-    res.status(500).json({ error: 'Authentication failed', details: error.message });
+    handleServerError(res, error);
   }
 };
 
 exports.getProfile = async (req, res) => {
   try {
-    const user = await User.findById(req.user._id);
+    const user = await User.findOne({ telegramId: req.user.telegramId });
     if (!user) return res.status(404).json({ message: 'User not found' });
     res.json(user);
   } catch (error) {
