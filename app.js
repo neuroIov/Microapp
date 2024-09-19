@@ -14,7 +14,6 @@ const auth = require('./middleware/auth');
 const { initTelegramBot } = require('./utils/telegramBot');
 const { authenticateTelegram } = require('./controllers/userController');
 const { validateTelegramAuth } = require('./validation/userValidation');
-const telegramAuthMiddleware = require('./middleware/telegramAuth');
 
 // Import route files
 const userRoutes = require('./routes/userRoutes');
@@ -47,10 +46,10 @@ app.use(helmet({
 
 // CORS configuration
 app.use(cors({
-  origin: process.env.CORS_ORIGIN || 'https://neuro-orpin.vercel.app',
+  origin: [process.env.CORS_ORIGIN, 'https://web.telegram.org'],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Telegram-Data'],
 }));
 
 app.use(compression());
@@ -65,7 +64,7 @@ const limiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
 });
-app.use('/api', telegramAuthMiddleware);
+app.use('/api', limiter);
 
 // Prometheus metrics
 prometheus.collectDefaultMetrics({ timeout: 5000 });
@@ -88,6 +87,11 @@ app.use((req, res, next) => {
   next();
 });
 
+// Health check route
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'OK' });
+});
+
 // Telegram authentication route
 app.post('/auth/telegram', validateTelegramAuth, authenticateTelegram);
 
@@ -106,18 +110,26 @@ app.get('/metrics', async (req, res) => {
   res.end(await prometheus.register.metrics());
 });
 
-// Telegram bot webhook endpoint
+// Initialize Telegram bot
+const botPromise = initTelegramBot().catch(error => {
+  logger.error('Failed to initialize Telegram bot:', error);
+  return null;
+});
+
+// Telegram bot webhook route
 app.post(`/bot${process.env.TELEGRAM_BOT_TOKEN}`, (req, res) => {
-  const bot = initTelegramBot();
-  bot.processUpdate(req.body);
-  res.sendStatus(200);
+  botPromise.then(bot => {
+    if (bot) {
+      bot.processUpdate(req.body);
+    } else {
+      logger.error('Telegram bot not initialized');
+    }
+    res.sendStatus(200);
+  });
 });
 
 // Error handling middleware
 app.use(errorHandler);
-
-// Initialize Telegram bot
-initTelegramBot().catch(error => logger.error('Failed to initialize Telegram bot:', error));
 
 // Graceful shutdown
 process.on('SIGTERM', () => {
