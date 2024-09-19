@@ -50,13 +50,20 @@ Get started now and watch your virtual GPU come to life! 🚀`;
           const token = user.generateAuthToken();
       
           if (!user.hasSeenWelcomeMessage) {
-            // Send the image and welcome message (unchanged)
-            // ...
+            // Send the welcome image
+            await bot.sendPhoto(chatId, 'https://bayanbox.ir/view/4187791167840408524/Telegram-Banner.jpg', { caption: 'Welcome to Neurolov Compute Bot!' });
+            
+            // Send the welcome message
+            await bot.sendMessage(chatId, welcomeMessage);
+            
+            // Update user's hasSeenWelcomeMessage flag
+            user.hasSeenWelcomeMessage = true;
+            await user.save();
           }
       
           const webAppUrl = `${config.webAppUrl}?token=${token}`;
       
-          bot.sendMessage(chatId, 'Start Computing Now:', {
+          await bot.sendMessage(chatId, 'Start Computing Now:', {
             reply_markup: {
               inline_keyboard: [
                 [{ text: 'Earn Now', web_app: { url: webAppUrl } }]
@@ -68,7 +75,6 @@ Get started now and watch your virtual GPU come to life! 🚀`;
           bot.sendMessage(chatId, 'An error occurred. Please try again later.');
         }
       });
-
 
       bot.onText(/\/help/, (msg) => {
         const chatId = msg.chat.id;

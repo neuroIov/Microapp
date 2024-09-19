@@ -1,54 +1,57 @@
 const User = require('../models/User');
-const { handleServerError } = require('../middleware/errorHandler');
-const jwt = require('jsonwebtoken');
-const config = require('../config');
+const { verifyTelegramWebAppData } = require('../utils/telegramUtils');
+const logger = require('../utils/logger');
 
 exports.authenticateTelegram = async (req, res) => {
   try {
-    const { id, first_name, username, photo_url, auth_date, hash } = req.body;
+    const initData = req.body.initData || req.headers['x-telegram-init-data'];
     
-    // Verify the authentication data
-    const secretKey = crypto.createHash('sha256')
-      .update(config.telegramBotToken)
-      .digest();
-    const dataCheckString = Object.keys(req.body)
-      .filter(key => key !== 'hash')
-      .sort()
-      .map(key => `${key}=${req.body[key]}`)
-      .join('\n');
-    const hmac = crypto.createHmac('sha256', secretKey)
-      .update(dataCheckString)
-      .digest('hex');
-    
-    if (hmac !== hash) {
-      return res.status(401).json({ error: 'Invalid authentication data' });
+    if (!initData) {
+      return res.status(400).json({ message: 'Telegram init data is missing' });
     }
 
-    // Check if auth_date is not older than 1 hour
-    const now = Math.floor(Date.now() / 1000);
-    if (now - auth_date > 3600) {
-      return res.status(401).json({ error: 'Authentication data expired' });
+    if (!verifyTelegramWebAppData(initData)) {
+      return res.status(401).json({ message: 'Invalid Telegram data' });
     }
+
+    const parsedInitData = new URLSearchParams(initData);
+    const userData = JSON.parse(parsedInitData.get('user'));
 
     let user = await User.findOneAndUpdate(
-      { telegramId: id },
+      { telegramId: userData.id },
       { 
         $set: { 
-          username: username || first_name,
-          avatarUrl: photo_url
+          username: userData.username,
+          firstName: userData.first_name,
+          lastName: userData.last_name,
+          languageCode: userData.language_code,
+          photoUrl: userData.photo_url
         },
-        $setOnInsert: { telegramId: id }
+        $setOnInsert: { telegramId: userData.id }
       },
       { new: true, upsert: true }
     );
 
-    const token = jwt.sign({ id: user.telegramId }, config.jwtSecret, { expiresIn: '7d' });
+    const token = user.generateAuthToken();
 
-    res.json({ token, user: user.toJSON() });
+    res.json({
+      token,
+      user: {
+        id: user.telegramId,
+        username: user.username,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        languageCode: user.languageCode,
+        photoUrl: user.photoUrl,
+        xp: user.xp
+      }
+    });
   } catch (error) {
-    handleServerError(res, error);
+    logger.error('Authentication error:', error);
+    res.status(500).json({ error: 'Authentication failed', details: error.message });
   }
 };
+
 
 exports.getProfile = async (req, res) => {
   try {
@@ -84,21 +87,24 @@ exports.updateProfile = async (req, res) => {
 
 exports.claimDailyXP = async (req, res) => {
   try {
-    if (req.user.canClaimDailyXP()) {
+    const user = await User.findOne({ telegramId: req.user.telegramId });
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    if (user.canClaimDailyXP()) {
       const xpGained = 500;
-      req.user.xp += xpGained;
-      req.user.lastDailyClaimDate = new Date();
-      req.user.checkInStreak += 1;
-      await req.user.save();
-      res.json({ message: 'Daily XP claimed successfully', xpGained, newTotalXp: req.user.xp });
-      logger.info(`Daily XP claimed: ${req.user._id}`);
+      user.xp += xpGained;
+      user.lastDailyClaimDate = new Date();
+      user.checkInStreak += 1;
+      await user.save();
+      res.json({ message: 'Daily XP claimed successfully', xpGained, newTotalXp: user.xp });
     } else {
-      logger.warn(`Attempted to claim XP too soon: ${req.user._id}`);
       res.status(400).json({ message: 'Daily XP already claimed' });
     }
   } catch (error) {
-    logger.error(`Claim daily XP error: ${error.message}`);
-    handleServerError(res, error);
+    console.error('Claim daily XP error:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
 

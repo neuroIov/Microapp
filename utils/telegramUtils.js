@@ -1,16 +1,25 @@
 const crypto = require('crypto');
 const config = require('../config');
 
-exports.verifyTelegramWebAppData = (data) => {
-  const { hash, ...dataToCheck } = data;
-  
-  const checkString = Object.keys(dataToCheck)
-    .sort()
-    .map(key => `${key}=${dataToCheck[key]}`)
-    .join('\n');
+exports.verifyTelegramWebAppData = (initData) => {
+  try {
+    const urlParams = new URLSearchParams(initData);
+    const hash = urlParams.get('hash');
+    urlParams.delete('hash');
+    urlParams.sort();
 
-  const secretKey = crypto.createHmac('sha256', 'WebAppData').update(config.telegramBotToken).digest();
-  const calculatedHash = crypto.createHmac('sha256', secretKey).update(checkString).digest('hex');
+    let dataCheckString = '';
+    for (const [key, value] of urlParams.entries()) {
+      dataCheckString += `${key}=${value}\n`;
+    }
+    dataCheckString = dataCheckString.slice(0, -1);
 
-  return calculatedHash === hash;
+    const secretKey = crypto.createHmac('sha256', 'WebAppData').update(config.telegramBotToken).digest();
+    const calculatedHash = crypto.createHmac('sha256', secretKey).update(dataCheckString).digest('hex');
+
+    return calculatedHash === hash;
+  } catch (error) {
+    console.error('Error verifying Telegram Web App data:', error);
+    return false;
+  }
 };

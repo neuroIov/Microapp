@@ -1,0 +1,11 @@
+{"level":"info","message":"Telegram bot initialized with long polling","service":"neurolov-backend","timestamp":"2024-09-18T20:41:29.072Z"}
+{"level":"info","message":"Server running on port 3000","service":"neurolov-backend","timestamp":"2024-09-18T20:41:29.081Z"}
+{"level":"info","message":"MongoDB connected successfully","service":"neurolov-backend","timestamp":"2024-09-18T20:41:38.984Z"}
+{"level":"info","message":"Start command received from user: 5505770888","service":"neurolov-backend","timestamp":"2024-09-18T20:43:10.464Z"}
+{"level":"error","message":"Error in /start command for user 5505770888: config is not defined","service":"neurolov-backend","stack":"ReferenceError: config is not defined\n    at userSchema.methods.generateAuthToken (C:\\Users\\neohe\\Desktop\\Microapp\\models\\User.js:50:44)\n    at Object.callback (C:\\Users\\neohe\\Desktop\\Microapp\\utils\\telegramBot.js:50:30)\n    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)","timestamp":"2024-09-18T20:43:10.595Z"}
+{"level":"info","message":"Telegram bot initialized with long polling","service":"neurolov-backend","timestamp":"2024-09-19T05:20:35.461Z"}
+{"level":"info","message":"Server running on port 3000","service":"neurolov-backend","timestamp":"2024-09-19T05:20:35.477Z"}
+{"level":"info","message":"MongoDB connected successfully","service":"neurolov-backend","timestamp":"2024-09-19T05:20:35.867Z"}
+{"level":"info","message":"Telegram bot initialized with long polling","service":"neurolov-backend","timestamp":"2024-09-19T06:33:22.333Z"}
+{"level":"info","message":"Server running on port 3000","service":"neurolov-backend","timestamp":"2024-09-19T06:33:22.341Z"}
+{"level":"info","message":"MongoDB connected successfully","service":"neurolov-backend","timestamp":"2024-09-19T06:33:22.666Z"}
