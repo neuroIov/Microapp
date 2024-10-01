@@ -13,31 +13,46 @@ const userSchema = new mongoose.Schema({
   compute: { type: Number, default: 0, index: true },
   computePower: { type: Number, default: 1, index: true },
   level: { type: Number, default: 0 },
-  avatarUrl: { type: String },
-  lastDailyClaimDate: { type: Date },
+  gpuLevel: { type: Number, default: 1 },
   totalTaps: { type: Number, default: 0 },
-  lastTapTime: { type: Date, index: true },
+  lastTapTime: { type: Date },
+  cooldownEndTime: { type: Date },
+  boostCount: { type: Number, default: 0 },
+  lastBoostTime: { type: Date },
   referredBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', index: true },
   referrals: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
   referralCode: { type: String, unique: true, sparse: true, index: true },
   referralChain: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-  hasSeenWelcomeMessage: { type: Boolean, default: false },
+  totalReferralXP: { type: Number, default: 0 },
   achievements: [{
     id: String,
     completed: Boolean,
-    progress: Number
+    dateCompleted: Date
   }],
   dailyQuests: [{
     id: String,
     completed: Boolean,
-    progress: Number
+    progress: Number,
+    dateCompleted: Date
   }],
-  lastCheckIn: { type: Date },
+  lastDailyClaimDate: { type: Date },
   checkInStreak: { type: Number, default: 0 },
-  cooldownEndTime: { type: Date },
+  completedQuests: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Quest' }],
   notifications: { type: Boolean, default: true },
   language: { type: String, default: 'en' },
-  theme: { type: String, default: 'dark' }
+  theme: { type: String, default: 'dark' },
+  soundEnabled: { type: Boolean, default: true },
+  vibrationEnabled: { type: Boolean, default: true },
+  isTeamMember: { type: Boolean, default: false },
+  
+  //achievement tracking
+  twitterConnected: { type: Boolean, default: false },
+  telegramConnected: { type: Boolean, default: true }, // Assumed true since they're using Telegram
+  discordConnected: { type: Boolean, default: false },
+  loginStreak: { type: Number, default: 0 },
+  hasCustomizedRig: { type: Boolean, default: false },
+  fullCoinsMined: { type: Number, default: 0 },
+  highestLeaderboardRank: { type: Number, default: Infinity }
 }, { 
   timestamps: true,
   toJSON: { virtuals: true },
@@ -63,5 +78,65 @@ userSchema.methods.toJSON = function() {
   delete obj.__v;
   return obj;
 };
+
+userSchema.methods.shouldUpgradeGPU = function() {
+  return this.xp >= this.gpuLevel * 25000;
+};
+
+userSchema.methods.upgradeGPU = function() {
+  if (this.shouldUpgradeGPU()) {
+    this.gpuLevel += 1;
+    this.computePower += 1;
+    return true;
+  }
+  return false;
+};
+
+// update login streak
+userSchema.methods.updateLoginStreak = function() {
+  const now = new Date();
+  const yesterday = new Date(now.getTime() - (24 * 60 * 60 * 1000));
+  
+  if (this.lastDailyClaimDate && this.lastDailyClaimDate >= yesterday) {
+    this.loginStreak += 1;
+  } else {
+    this.loginStreak = 1;
+  }
+  
+  this.lastDailyClaimDate = now;
+  this.checkInStreak = Math.max(this.checkInStreak, this.loginStreak);
+};
+
+// update leaderboard rank
+userSchema.methods.updateLeaderboardRank = function(newRank) {
+  this.highestLeaderboardRank = Math.min(this.highestLeaderboardRank, newRank);
+};
+
+userSchema.methods.addReferral = function(referredUserId) {
+  if (!this.referrals.includes(referredUserId)) {
+    this.referrals.push(referredUserId);
+  }
+};
+
+userSchema.methods.updateReferralChain = async function() {
+  if (!this.referredBy) return;
+
+  const referralChain = [];
+  let currentReferrer = await User.findById(this.referredBy);
+  
+  while (currentReferrer && referralChain.length < 3) {
+    referralChain.push(currentReferrer._id);
+    currentReferrer = await User.findById(currentReferrer.referredBy);
+  }
+
+  this.referralChain = referralChain;
+};
+
+userSchema.pre('save', async function(next) {
+  if (this.isModified('referredBy')) {
+    await this.updateReferralChain();
+  }
+  next();
+});
 
 module.exports = mongoose.model('User', userSchema);
