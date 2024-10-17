@@ -4,7 +4,7 @@ const helmet = require('helmet');
 const cors = require('cors');
 const compression = require('compression');
 const prometheus = require('prom-client');
-const rateLimit = require('express-rate-limit');
+const morgan = require('morgan');
 
 const logger = require('./utils/logger');
 const connectDB = require('./database/mongoose');
@@ -14,8 +14,12 @@ const auth = require('./middleware/auth');
 const { initTelegramBot } = require('./utils/telegramBot');
 const { authenticateTelegram } = require('./controllers/userController');
 const { validateTelegramAuth } = require('./validation/userValidation');
+const userController = require('./controllers/userController');
+const cacheMiddleware = require('./middleware/cacheMiddleware');
+
 
 // Import route files
+const config = require('./config');
 const userRoutes = require('./routes/userRoutes');
 const questRoutes = require('./routes/questRoutes');
 const leaderboardRoutes = require('./routes/leaderboardRoutes');
@@ -23,6 +27,9 @@ const profileDashboardRoutes = require('./routes/profileDashboardRoutes');
 const referralRoutes = require('./routes/referralRoutes');
 const settingsRoutes = require('./routes/settingsRoutes');
 const achievementRoutes = require('./routes/achievementRoutes');
+
+const { initCronJobs } = require('./utils/cronJobs');
+const { gracefulShutdown } = require('./jobs/jobQueue');
 
 const app = express();
 
@@ -44,27 +51,18 @@ app.use(helmet({
   },
 }));
 
-// CORS configuration
+// CORS config
 app.use(cors({
-  origin: [process.env.CORS_ORIGIN, 'https://web.telegram.org'],
+  origin: [process.env.CORS_ORIGIN,'http://localhost:3000', 'https://web.telegram.org', 'https://d14amhlx1vsse8.cloudfront.net'],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'Telegram-Data'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Telegram-Init-Data']
 }));
 
 app.use(compression());
 app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 app.use(rateLimiter);
-
-// Rate limiting
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 100,
-  standardHeaders: true,
-  legacyHeaders: false,
-});
-app.use('/api', limiter);
 
 // Prometheus metrics
 prometheus.collectDefaultMetrics({ timeout: 5000 });
@@ -87,22 +85,27 @@ app.use((req, res, next) => {
   next();
 });
 
+// New root route handler
+app.get('/', (req, res) => {
+  res.send('Welcome to Neohex! The API is up and running.');
+});
+
 // Health check route
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'OK' });
 });
 
 // Telegram authentication route
-app.post('/auth/telegram', validateTelegramAuth, authenticateTelegram);
+app.post('/auth/telegram', validateTelegramAuth, userController.authenticateTelegram);
 
-// API Routes
-app.use('/api/users', userRoutes);
-app.use('/api/quests', auth, questRoutes);
-app.use('/api/leaderboard', auth, leaderboardRoutes);
-app.use('/api/profile-dashboard', auth, profileDashboardRoutes);
-app.use('/api/referral', auth, referralRoutes);
+// API Routes with caching middleware
+app.use('/api/users', cacheMiddleware(300), userRoutes);
+app.use('/api/quests', auth, cacheMiddleware(300), questRoutes);
+app.use('/api/leaderboard', auth, cacheMiddleware(60), leaderboardRoutes);
+app.use('/api/profile-dashboard', auth, cacheMiddleware(300), profileDashboardRoutes);
+app.use('/api/referral', auth, cacheMiddleware(300), referralRoutes);
 app.use('/api/settings', auth, settingsRoutes);
-app.use('/api/achievements', auth, achievementRoutes);
+app.use('/api/achievements', auth, cacheMiddleware(300), achievementRoutes);
 
 // Expose metrics endpoint for Prometheus
 app.get('/metrics', async (req, res) => {
@@ -132,9 +135,10 @@ app.post(`/bot${process.env.TELEGRAM_BOT_TOKEN}`, (req, res) => {
 app.use(errorHandler);
 
 // Graceful shutdown
-process.on('SIGTERM', () => {
+process.on('SIGTERM', async () => {
   logger.info('SIGTERM signal received.');
   logger.info('Closing HTTP server.');
+  await gracefulShutdown();
   server.close(() => {
     logger.info('HTTP server closed.');
     // Close database connection
