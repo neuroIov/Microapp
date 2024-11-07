@@ -13,7 +13,7 @@
 - Component: `CheckIn.js`
 - Description: Initial screen for new users or daily check-in for returning users
 - Features:
-  - Large "Claim 100 XP" button
+  - Large "Claim 500 XP" button
   - Telegram authentication happens in the background when button is pressed
   - Animation showing XP being added to user's account
   - Brief tutorial or tooltip explaining the concept of XP
@@ -37,7 +37,8 @@
   - Upgrade GPU when enough XP is accumulated
 - Special Effects:
   - Fan color changes at 10,000 XP
-  - Fan design upgrades at 25,000 XP
+  - Fan design upgrades at 50,000 XP
+  - CP Level changes 25,000 XP
   - Haptic feedback on taps and milestones
 
 ## 4. Leaderboard Screen
